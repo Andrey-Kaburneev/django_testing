@@ -25,17 +25,20 @@ class TestNoteCreation(TestCase):
                          'slug': 'slug',
                          'title': 'title'}
 
-    def test_anonymous_user_cant_create_note(self): 
+    def test_anonymous_user_cant_create_note(self):
+        """Аноним не может создавать заметки"""
         self.client.post(self.url, data=self.form_data)
         notes_count = Note.objects.count()
         self.assertEqual(notes_count, 0)
 
     def test_user_can_create_notes(self):
+        """Аторизованный пользователь может создавать заметки"""
         self.auth_client.post(self.url, data=self.form_data)
         notes_count = Note.objects.count()
         self.assertEqual(notes_count, 1)
 
     def test_not_unique_slug(self):
+        """Проверка уникальности слага заметки"""
         self.note = Note.objects.create(
             title='Заголовок',
             text='Текст',
@@ -53,6 +56,7 @@ class TestNoteCreation(TestCase):
         self.assertEqual(Note.objects.count(), 1)
 
     def test_auto_generate_slug(self):
+        """Автоматическая генерация слага"""
         url = reverse('notes:add')
         form_data = {
             'title': 'New Note',
@@ -66,6 +70,7 @@ class TestNoteCreation(TestCase):
         new_note = Note.objects.get()
         expected_slug = slugify(form_data['title'])
         self.assertEqual(new_note.slug, expected_slug)
+
 
 class TestNoteEditDelete(TestCase):
     COMMENT_TEXT = 'Запись'
@@ -88,17 +93,20 @@ class TestNoteEditDelete(TestCase):
         cls.form_data = {'text': cls.NEW_COMMENT_TEXT}
 
     def test_author_can_delete_note(self):
+        """Автор может удалить заметку"""
         response = self.author_client.delete(self.delete_url)
         self.assertRedirects(response, reverse('notes:success'))
         self.assertEqual(Note.objects.count(), 0)
 
     def test_other_user_cant_delete_note(self):
+        """Никто кроме автора не может удалить заметку"""
         response = self.reader_client.delete(self.delete_url)
         self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
         note_count = Note.objects.count()
         self.assertEqual(note_count, 1)
 
     def test_author_can_edit_note(self):
+        """Автор может редактировать заметку"""
         form_data = {
             'title': 'title',
             'text': 'text',
@@ -112,6 +120,7 @@ class TestNoteEditDelete(TestCase):
         self.assertEqual(self.note.slug, form_data['slug'])
 
     def test_user_cant_edit_comment_of_another_user(self):
+        """Никто кроме автора не может редактировать заметку"""
         response = self.reader_client.post(self.edit_url, data=self.form_data)
         self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
         self.note.refresh_from_db()

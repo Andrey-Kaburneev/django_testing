@@ -7,6 +7,7 @@ import pytest
 
 @pytest.mark.django_db
 def test_news_count(client, list_news):
+    """Количество новостей на главной странице"""
     url = reverse('news:home')
     response = client.get(url)
     object_list = response.context['object_list']
@@ -16,6 +17,7 @@ def test_news_count(client, list_news):
 
 @pytest.mark.django_db
 def test_news_order(client, list_news):
+    """Сортировка новостей от самой свежей к старой"""
     url = reverse('news:home')
     response = client.get(url)
     object_list = response.context['object_list']
@@ -26,6 +28,7 @@ def test_news_order(client, list_news):
 
 @pytest.mark.django_db
 def test_comments_order(client, news, list_comments):
+    """Сортировка комментариев на странице с новостью"""
     url = reverse('news:detail', args=(news.id,))
     response = client.get(url)
     assert 'news' in response.context
@@ -43,6 +46,10 @@ def test_comments_order(client, news, list_comments):
 )
 @pytest.mark.django_db
 def test_anonymous_client_has_no_form(parametrized_client, status, comment):
+    """
+    Анонимному пользователю недоступна форма для отправки
+    комментария
+    """
     url = reverse('news:detail', args=(comment.id,))
     response = parametrized_client.get(url)
     assert ('form' in response.context) is status

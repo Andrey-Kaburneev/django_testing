@@ -17,12 +17,14 @@ class TestRoutes(TestCase):
         cls.author = User.objects.create(username='Автор')
         cls.reader = User.objects.create(username='Читатель')
         cls.user = User.objects.create(username='testUser')
-        cls.note = Note.objects.create(title='Заголовок',
-                                       text='Текст',
-                                       author=cls.author)
+        cls.note = Note.objects.create(
+            title='Заголовок',
+            text='Текст',
+            author=cls.author
+        )
 
-# Страницы доступные анониму
     def test_pages_availability(self):
+        """Страницы доступные анониму"""
         urls = (
             ('notes:home', None),
             ('users:login', None),
@@ -35,9 +37,11 @@ class TestRoutes(TestCase):
                 response = self.client.get(url)
                 self.assertEqual(response.status_code, HTTPStatus.OK)
 
-
-# Страницы редактирования,удаления и отдельной записи доступны только автору
     def test_availability_for_note_edit_and_delete(self):
+        """
+        Страницы редактирования,удаления и
+        отдельной записи доступны только автору
+        """
         users_statuses = (
             (self.author, HTTPStatus.OK),
             (self.reader, HTTPStatus.NOT_FOUND),
@@ -50,24 +54,24 @@ class TestRoutes(TestCase):
                     response = self.client.get(url)
                     self.assertEqual(response.status_code, status)
 
-# Доступ к записи для автора
     def test_detail_note_for_author(self):
+        """Доступ к записи для автора"""
         url = reverse('notes:detail', args=(self.note.slug,))
         self.client.force_login(self.author)
         response = self.client.get(url)
         self.assertEqual(response.status_code, HTTPStatus.OK)
 
-# Доступ к записи для анонима
     def test_detail_note_for_not_the_author(self):
+        """Доступ к записи для анонима"""
         url = reverse('notes:detail', args=(self.note.slug,))
         self.client.force_login(self.reader)
-        response = self.client.get(url) 
+        response = self.client.get(url)
         self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
         response = self.client.get(url)
         self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
 
-# Может ли авторизованный пользователь зайти на страницы
     def test_pages_availability_for_authorized(self):
+        """Может ли авторизованный пользователь зайти на страницы"""
         urls = (
             ('notes:list', None),
             ('notes:success', None),
@@ -80,8 +84,8 @@ class TestRoutes(TestCase):
                 response = self.client.get(url)
                 self.assertEqual(response.status_code, HTTPStatus.OK)
 
-# Редирект анониман на страницу логина
     def test_pages_availability_for_authorized_login(self):
+        """Редирект анониман на страницу логина"""
         urls = (
             ('notes:list', None),
             ('notes:success', None),
