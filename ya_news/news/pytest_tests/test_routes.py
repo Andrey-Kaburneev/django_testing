@@ -1,13 +1,11 @@
 from http import HTTPStatus
 
+import pytest
+from pytest_django.asserts import assertRedirects
 from django.urls import reverse
 
-import pytest
 
-from pytest_django.asserts import assertRedirects
-
-
-@pytest.mark.django_db
+@pytest.mark.django_db  # Arrange
 @pytest.mark.parametrize(
     'name',
     ('news:home', 'users:login', 'users:logout', 'users:signup')
@@ -15,19 +13,23 @@ from pytest_django.asserts import assertRedirects
 def test_pages_availability(client, name):
     """Проверяем доступность страниц анониму"""
     url = reverse(name)
-    response = client.get(url)
-    assert response.status_code == HTTPStatus.OK
+
+    response = client.get(url)  # Act
+
+    assert response.status_code == HTTPStatus.OK  # Assert
 
 
-@pytest.mark.django_db
+@pytest.mark.django_db  # Arrange
 def test_detail_page(client, news):
     """Страница отдельной записи"""
     url = reverse('news:detail', args=(news.id,))
-    response = client.get(url)
-    assert response.status_code == HTTPStatus.OK
+
+    response = client.get(url)  # Act
+
+    assert response.status_code == HTTPStatus.OK  # Assert
 
 
-@pytest.mark.parametrize(
+@pytest.mark.parametrize(  # Arrange
     'parametrized_client, expected_status',
     (
         (pytest.lazy_fixture('admin_client'), HTTPStatus.NOT_FOUND),
@@ -43,11 +45,13 @@ def test_availability_for_comment_edit_and_delete(
 ):
     """Доступность удаления и редактирования комментария"""
     url = reverse(name, args=(comment.id,))
-    response = parametrized_client.get(url)
-    assert response.status_code == expected_status
+
+    response = parametrized_client.get(url)  # Act
+
+    assert response.status_code == expected_status  # Assert
 
 
-@pytest.mark.django_db
+@pytest.mark.django_db  # Arrange
 @pytest.mark.parametrize(
     'name',
     ('news:edit', 'news:delete'),
@@ -57,5 +61,7 @@ def test_redirect_for_anonymous_client(client, name, comment):
     login_url = reverse('users:login')
     url = reverse(name, args=(comment.id,))
     expected_url = f'{login_url}?next={url}'
-    response = client.get(url)
-    assertRedirects(response, expected_url)
+
+    response = client.get(url)  # Act
+
+    assertRedirects(response, expected_url)  # Assert
