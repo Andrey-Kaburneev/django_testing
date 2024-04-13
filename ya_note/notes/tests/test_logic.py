@@ -1,3 +1,6 @@
+# Я не совсем понимаю как разделить unittest по патерну AAA
+# нужно разделить один тест на пару функции в одной из которых
+# будет arrange, во второй act, а в третьей assert?
 from http import HTTPStatus
 
 from django.contrib.auth import get_user_model
