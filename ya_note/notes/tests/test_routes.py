@@ -33,7 +33,9 @@ class TestRoutes(TestCase):
         for name, args in urls:
             with self.subTest(name=name):
                 url = reverse(name, args=args)
+
                 response = self.client.get(url)
+
                 self.assertEqual(response.status_code, HTTPStatus.OK)
 
     def test_availability_for_note_edit_and_delete(self):
@@ -50,22 +52,25 @@ class TestRoutes(TestCase):
             for name in ('notes:edit', 'notes:delete'):
                 with self.subTest(user=user, name=name):
                     url = reverse(name, args=(self.note.slug,))
+
                     response = self.client.get(url)
+
                     self.assertEqual(response.status_code, status)
 
     def test_detail_note_for_author(self):
         """Доступ к записи для автора"""
         url = reverse('notes:detail', args=(self.note.slug,))
         self.client.force_login(self.author)
+
         response = self.client.get(url)
+
         self.assertEqual(response.status_code, HTTPStatus.OK)
 
     def test_detail_note_for_not_the_author(self):
         """Доступ к записи для анонима"""
         url = reverse('notes:detail', args=(self.note.slug,))
         self.client.force_login(self.reader)
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
+
         response = self.client.get(url)
         self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
 
@@ -80,7 +85,9 @@ class TestRoutes(TestCase):
         for name, args in urls:
             with self.subTest(user=self.reader, name=name):
                 url = reverse(name, args=args,)
+
                 response = self.client.get(url)
+
                 self.assertEqual(response.status_code, HTTPStatus.OK)
 
     def test_pages_availability_for_authorized_login(self):
@@ -96,6 +103,8 @@ class TestRoutes(TestCase):
         for name, args in urls:
             with self.subTest(name=name):
                 url = reverse(name, args=args)
+
                 response = self.client.get(url)
+
                 redirect_url = f'{login_url}?next={url}'
                 self.assertRedirects(response, redirect_url)

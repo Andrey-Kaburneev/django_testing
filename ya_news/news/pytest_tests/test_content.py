@@ -3,42 +3,42 @@ from django.conf import settings
 from django.urls import reverse
 
 
-@pytest.mark.django_db  # Arrange
+@pytest.mark.django_db
 def test_news_count(client, list_news):
     """Количество новостей на главной странице"""
     url = reverse('news:home')
 
-    response = client.get(url)  # Act
+    response = client.get(url)
+
     object_list = response.context['object_list']
     news_count = len(object_list)
+    assert news_count == settings.NEWS_COUNT_ON_HOME_PAGE
 
-    assert news_count == settings.NEWS_COUNT_ON_HOME_PAGE  # Assert
 
-
-@pytest.mark.django_db  # Arrange
+@pytest.mark.django_db
 def test_news_order(client, list_news):
     """Сортировка новостей от самой свежей к старой"""
     url = reverse('news:home')
 
-    response = client.get(url)  # Act
+    response = client.get(url)
+
     object_list = response.context['object_list']
     all_news = [news for news in object_list]
     sorted_news = sorted(all_news, key=lambda x: x.date, reverse=True)
+    assert sorted_news == list_news
 
-    assert sorted_news == list_news  # Assert
 
-
-@pytest.mark.django_db  # Arrange
+@pytest.mark.django_db
 def test_comments_order(client, news, list_comments):
     """Сортировка комментариев на странице с новостью"""
     url = reverse('news:detail', args=(news.id,))
 
-    response = client.get(url)  # Act
+    response = client.get(url)
+
     assert 'news' in response.context
     news = response.context['news']
     all_comments = news.comment_set.all()
-
-    assert all_comments[0].created < all_comments[1].created  # Assert
+    assert all_comments[0].created < all_comments[1].created
 
 
 @pytest.mark.parametrize(  # Arrange

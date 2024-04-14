@@ -1,6 +1,3 @@
-# Я не совсем понимаю как разделить unittest по патерну AAA
-# нужно разделить один тест на пару функции в одной из которых
-# будет arrange, во второй act, а в третьей assert?
 from http import HTTPStatus
 
 from django.contrib.auth import get_user_model
@@ -26,7 +23,7 @@ class BaseTestCase(TestCase):
         cls.reader_client.force_login(cls.reader)
 
 
-class TestNoteCreation(BaseTestCase):
+class CreateNoteTestCase(BaseTestCase):
     NOTE_TEXT = 'Текст заметки'
 
     @classmethod
@@ -40,12 +37,16 @@ class TestNoteCreation(BaseTestCase):
 
     def test_anonymous_user_cant_create_note(self):
         self.client.post(self.url, data=self.form_data)
+
         notes_count = Note.objects.count()
+
         self.assertEqual(notes_count, 0)
 
     def test_user_can_create_notes(self):
         self.author_client.post(self.url, data=self.form_data)
+
         notes_count = Note.objects.count()
+
         self.assertEqual(notes_count, 1)
 
     def test_not_unique_slug(self):
@@ -55,11 +56,13 @@ class TestNoteCreation(BaseTestCase):
             author=self.author,
         )
         url = reverse('notes:add')
+
         response = self.author_client.post(url, data={
             'title': 'Новый заголовок',
             'text': 'Новый текст',
             'slug': self.note.slug
         })
+
         self.assertFormError(
             response, 'form', 'slug', errors=(self.note.slug + WARNING)
         )
@@ -73,7 +76,9 @@ class TestNoteCreation(BaseTestCase):
             'text': 'text',
         }
         form_data.pop('slug')
+
         response = self.author_client.post(url, data=form_data)
+
         self.assertRedirects(response, reverse('notes:success'))
         self.assertEqual(Note.objects.count(), 1)
         new_note = Note.objects.get()
