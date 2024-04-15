@@ -72,6 +72,7 @@ class TestRoutes(TestCase):
         self.client.force_login(self.reader)
 
         response = self.client.get(url)
+
         self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
 
     def test_pages_availability_for_authorized(self):

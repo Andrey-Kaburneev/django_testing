@@ -30,32 +30,28 @@ def test_user_can_create_comment(
     author_client.post(url, data=new_text_comment)
 
     comments_count_second = Comment.objects.count()
-    assert comments_count_first != comments_count_second
-    # comment = Comment.objects.get()
-    # assert comment.text == new_text_comment['text']
-    # assert comment.news == news
-    # assert comment.author == author
-    if not Comment.objects.filter(
+    assert comments_count_second - comments_count_first == 1
+    assert Comment.objects.filter(
         text=new_text_comment['text'], news=news, author=author
-    ).exists():
-        pass
+    ).exists()
 
 
-def test_user_cant_use_bad_words(author_client, news):  # Arrange
+def test_user_cant_use_bad_words(author_client, news):
     """Использование запрещенных слов"""
     bad_words_data = {'text': f'Какой-то текст, {BAD_WORDS[0]}, еще текст'}
     url = reverse('news:detail', args=(news.id,))
+    comments_count_first = Comment.objects.count()
 
-    response = author_client.post(url, data=bad_words_data)  # Act
+    response = author_client.post(url, data=bad_words_data)
 
-    assertFormError(  # Assert
+    assertFormError(
         response,
         form='form',
         field='text',
         errors=WARNING
     )
-    comments_count = Comment.objects.count()
-    assert comments_count == 0
+    comments_count_second = Comment.objects.count()
+    assert comments_count_first - comments_count_second == 0
 
 
 def test_author_can_delete_comment(author_client, news, comment):
@@ -68,7 +64,7 @@ def test_author_can_delete_comment(author_client, news, comment):
 
     assertRedirects(response, news_url + '#comments')
     comments_count_second = Comment.objects.count()
-    assert comments_count_first != comments_count_second
+    assert comments_count_first - comments_count_second == 1
 
 
 def test_user_cant_delete_comment_of_another_user(
